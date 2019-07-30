@@ -34,7 +34,8 @@ def plotData(X, Y):
     plt.xlabel('Populaion in $10,000s')
     plt.ylabel('profite in $10,000s')
     plt.show()
-    
+
+"""    
 function [theta, J_history] = gradientDescent(X, y, theta, alpha, num_iters)
 % theta = GRADIENTDESENT(X, y, theta, alpha, num_iters) updates theta by 
 % taking num_iters gradient steps with learning rate alpha
@@ -57,7 +58,7 @@ for iter = 1:num_iters
 end
 
 end
-
+"""
 
 ## ==================== Part 1: Basic Function ====================
 import numpy as np
@@ -94,6 +95,7 @@ theta = np.zeros((2, 1), dtype=float); # initialize fitting parameters
 iterations = 1500;
 alpha = 0.01;
 
+"""
 # compute and display initial cost
 computeCost(X, Y, theta)
 
@@ -120,5 +122,5 @@ fprintf('For population = 25,000, we predict a profit of %f\n',...
 
 fprintf('Program paused. Press enter to continue.\n');
 pause;
-
+"""
 
