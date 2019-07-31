@@ -10,11 +10,11 @@
 #     warmUpExercise
 #     plotData
 #     gradientDescent
-#     computeCost.m
-#     gradientDescentMulti.m
-#     computeCostMulti.m
-#     featureNormalize.m
-#     normalEqn.m
+#     computeCost
+#     gradientDescentMulti
+#     computeCostMulti
+#     featureNormalize
+#     normalEqn
 #
 #  For this exercise, you will not need to change any code in this file,
 #  or any other files other than those mentioned above.
