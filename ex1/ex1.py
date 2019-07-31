@@ -119,4 +119,3 @@ print('For population = 18,000, we predict a profit of ', predict1*10000)
 predict2 = np.matmul(np.array([1, 2.5]), theta)
 print('For population = 25,000, we predict a profit of ', predict2*10000);
 
-
