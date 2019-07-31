@@ -8,8 +8,8 @@
 #  in this exericse:
 #
 #     warmUpExercise
-#     plotData.m
-#     gradientDescent.m
+#     plotData
+#     gradientDescent
 #     computeCost.m
 #     gradientDescentMulti.m
 #     computeCostMulti.m
@@ -27,38 +27,42 @@
 def warmUpExercise():
     return np.eye(5)
 
-def plotData(X, Y):
+def plotData(X, Y, theta=None):
     #visualize
-    plt.scatter(X[:,0], Y, color = 'red')
+    plt.scatter(X[:,1], Y, color = 'red')
+    if theta is not None:
+        plt.plot(X[:,1], (np.matmul(X, theta)).flatten(), color = 'blue')
     plt.title('Population VS Profite')
     plt.xlabel('Populaion in $10,000s')
     plt.ylabel('profite in $10,000s')
     plt.show()
 
-"""    
-function [theta, J_history] = gradientDescent(X, y, theta, alpha, num_iters)
-% theta = GRADIENTDESENT(X, y, theta, alpha, num_iters) updates theta by 
-% taking num_iters gradient steps with learning rate alpha
+def computeCost(X, Y, theta):
+    # COMPUTECOST(X, y, theta) computes the cost for linear regression 
+    # using theta as the parameter for linear regression to fit the data 
+    # points in X and y
 
-m = length(y);
-J_history = zeros(num_iters, 1);
+    m = len(Y)
+    hX = (np.matmul(X, theta)).flatten()
+    J = (1/(2.0*m)) * np.sum ((hX - Y)**2)
+    return J
 
-for iter = 1:num_iters
+def gradientDescent(X, Y, theta, alpha, num_iters):
+    # GRADIENTDESENT(X, y, theta, alpha, num_iters) updates theta by 
+    # taking num_iters gradient steps with learning rate alpha
     
-    k = 1:m;
-    t1 = sum((theta(1) + theta(2) .* X(k,2)) - y(k)); % Un-Vectorized
-    t2 = sum(((theta(1) + theta(2) .* X(k,2)) - y(k)) .* X(k,2)); % Un-Vectorized
+    m = len(Y)
+    J_history = np.zeros((num_iters, ), dtype=float)
     
-    theta(1) = theta(1) - (alpha/m) * (t1);
-    theta(2) = theta(2) - (alpha/m) * (t2);
-    
-    % Save the cost J in every iteration    
-    J_history(iter) = computeCost(X, y, theta);
-
-end
-
-end
-"""
+    for i in range(num_iters):
+        hX = (np.matmul(X, theta)).flatten()
+        delta = (1.0/m) * (np.matmul(X.T, (hX - Y))).flatten()
+        theta = theta - alpha * delta
+        
+        # Save the cost J in every iteration  
+        J_history[i] = computeCost(X, Y, theta)
+        
+    return [theta, J_history]
 
 ## ==================== Part 1: Basic Function ====================
 import numpy as np
@@ -85,42 +89,34 @@ Y = data[:, -1]
 
 #Plot Data
 import matplotlib.pyplot as plt
-plotData(data[:, :-1], Y);
+plotData(X, Y)
 
 ## =================== Part 3: Gradient descent ===================
 print('Running Gradient Descent ...\n')
-theta = np.zeros((2, 1), dtype=float); # initialize fitting parameters
+theta = np.zeros((2, ), dtype=float) # initialize fitting parameters
 
 # Some gradient descent settings
 iterations = 1500;
 alpha = 0.01;
 
-"""
 # compute and display initial cost
-computeCost(X, Y, theta)
+J = computeCost(X, Y, theta)
+print('initial cost is ', J)
 
-% run gradient descent
-theta = gradientDescent(X, y, theta, alpha, iterations);
+# run gradient descent
+theta, J_history = gradientDescent(X, Y, theta, alpha, iterations)
 
-% print theta to screen
-fprintf('Theta found by gradient descent: ');
-fprintf('%f %f \n', theta(1), theta(2));
+# print theta to screen
+print('Theta found by gradient descent: ', theta)
 
-% Plot the linear fit
-hold on; % keep previous plot visible
-plot(X(:,2), X*theta, '-')
-legend('Training data', 'Linear regression')
-hold off % don't overlay any more plots on this figure
+# Plot the linear fit
+plotData(X, Y, theta)
 
-% Predict values for population sizes of 35,000 and 70,000
-predict1 = [1, 1.8] *theta;
-fprintf('For population = 18,000, we predict a profit of %f\n',...
-    predict1*10000);
-predict2 = [1, 2.5] * theta;
-fprintf('For population = 25,000, we predict a profit of %f\n',...
-    predict2*10000);
+# Predict values for population sizes of 35,000 and 70,000
+predict1 = np.matmul(np.array([1, 1.8]), theta)
+print('For population = 18,000, we predict a profit of ', predict1*10000)
 
-fprintf('Program paused. Press enter to continue.\n');
-pause;
-"""
+predict2 = np.matmul(np.array([1, 2.5]), theta)
+print('For population = 25,000, we predict a profit of ', predict2*10000);
+
 
