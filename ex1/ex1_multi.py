@@ -83,8 +83,8 @@ X[:, 1:] = temp[:,:]
 print('Running gradient descent ...\n')
 
 # Choose some alpha value
-alpha = 0.01;
-num_iters = 1000;
+alpha = 0.3;
+num_iters = 50;
 
 # Init Theta and Run Gradient Descent 
 theta = np.zeros((3, ), dtype=float)
