@@ -39,13 +39,20 @@ def gradientDescentMulti(X, y, theta, alpha, num_iters):
         
     return [theta, J_history]
 
-def single_predict(x):
+def single_predict_gradient_decent(x):
     x_norm = x - mu
     x_norm = x_norm / sigma
     x = np.ones((1, 3), dtype=float)
     x[:, 1:] = x_norm 
     price = ((np.matmul(x, theta)).flatten())[0]
     return price
+
+def normalEqn(X, Y):
+    #   NORMALEQN(X,y) computes the closed-form solution to linear 
+    #   regression using the normal equations.
+    theta = np.matmul(np.matmul(np.linalg.pinv(np.matmul(X.T, X)), X.T), Y)
+    return theta
+
     
     
 ## ================ Part 1: Feature Normalization ================
@@ -108,10 +115,42 @@ print('Theta computed from gradient descent: \n', theta)
 # not need to be normalized.
 
 newHouse = np.array([1650, 3])
-price = single_predict(newHouse)
+price = single_predict_gradient_decent(newHouse)
 
 
 # ============================================================
 
 print('Predicted price of a 1650 sq-ft, 3 br house (using gradient descent):\n  ', price)
+
+## ================ Part 3: Normal Equations ================
+
+print('Solving with normal equations...\n')
+
+## Load Data
+# read comma separated data
+dataTrack = open('ex1data2.txt')
+csvReader = csv.reader(dataTrack)
+l = list(csvReader)
+m = len(l) # number of training examples
+data = np.zeros([m, 3], dtype=float)
+data[:] = l
+
+X = np.ones((m,3), dtype=float)
+X[:, 1:] = data[:, :-1]
+Y = data[:, -1]
+
+# Calculate the parameters from the normal equation
+theta = normalEqn(X, Y);
+
+# Display normal equation's result
+print('Theta computed from the normal equations: \n', theta)
+
+
+
+# Estimate the price of a 1650 sq-ft, 3 br house
+newHouse = np.array([1, 1650, 3])
+price = ((np.matmul(newHouse, theta)).flatten())[0]
+
+print('Predicted price of a 1650 sq-ft, 3 br house (using normal equations):\n ', price)
+
 
