@@ -108,12 +108,6 @@ print('Theta computed from gradient descent: \n', theta)
 # not need to be normalized.
 
 newHouse = np.array([1650, 3])
-"""
-newHouse_norm = newHouse - mu
-newHouse_norm = newHouse_norm / sigma
-newHouse = np.ones((1, 3), dtype=float)
-newHouse[:, 1:] = newHouse_norm 
-"""
 price = single_predict(newHouse)
 
 
