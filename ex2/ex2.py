@@ -41,45 +41,34 @@ def sigmoid(z):
     return g
 #END
     
-def costFunction(X, y, theta):
-    # COSTFUNCTION Compute cost and gradient for logistic regression
-    #   J = COSTFUNCTION(theta, X, y) computes the cost of using theta as the
-    #   parameter for logistic regression and the gradient of the cost
-    #   w.r.t. to the parameters.
-"""   
-function [J, grad] = costFunction(theta, X, y)
-%COSTFUNCTION Compute cost and gradient for logistic regression
-%   J = COSTFUNCTION(theta, X, y) computes the cost of using theta as the
-%   parameter for logistic regression and the gradient of the cost
-%   w.r.t. to the parameters.
-
-% Initialize some useful values
-m = length(y); % number of training examples
-
-% You need to return the following variables correctly 
-J = 0;
-grad = zeros(size(theta));
-% ====================== YOUR CODE HERE ======================
-% Instructions: Compute the cost of a particular choice of theta.
-%               You should set J to the cost.
-%               Compute the partial derivatives and set grad to the partial
-%               derivatives of the cost w.r.t. each parameter in theta
-%
-% Note: grad should have the same dimensions as theta
-%
-h_theta = sigmoid(X*theta);
-J = (1 / m) * ((-y' * log(h_theta)) - (1 - y)' * log(1 - h_theta));
-
-grad = (1 / m) * (h_theta - y)' * X;
-
-
-
-
-
-% =============================================================
-
-end
-"""
+def costFunction(theta, X, y):
+    # COSTFUNCTION Compute cost for logistic regression
+    #   J = COSTFUNCTION(X, y, theta) computes the cost of using theta as the
+    #   parameter for logistic regression and.
+    
+    #np.matmul is a matrix multiplication
+    #np.multiply is a matrix element wise multiplation
+    
+    # Initialize some useful values
+    m = len(y) # number of training examples
+    hX = sigmoid(np.matmul(X, theta))
+    
+    J = (1.0 / m) * np.sum(np.multiply(-y, np.log(hX)) - np.multiply((1 - y), np.log(1 - hX)))
+    return J
+#END
+    
+def gradient(theta, X, y):
+    # Gradient Compute gradient for logistic regression
+    #  Gradient(X, y, theta) computes the gradient of the cost w.r.t. to the parameters.    
+    
+    # Initialize some useful values
+    m = len(y) # number of training examples
+    hX = sigmoid(np.matmul(X, theta))
+    
+    #grad = (1 / m) * (h_theta - y)' * X
+    delta = (1.0/m) * (np.matmul(X.T, (hX - y))).flatten()
+    return delta
+#END
 
 
 
@@ -113,26 +102,23 @@ plotData(X, y)
 
 ## ============ Part 2: Compute Cost and Gradient ============
 #  In this part of the exercise, you will implement the cost and gradient
-#  for logistic regression. You neeed to complete the code in 
-#  costFunction
+#  for logistic regression.
 
 #  Setup the data matrix appropriately, and add ones for the intercept term
-"""
-[m, n] = size(X);
+m, n = X.shape
 
-% Add intercept term to x and X_test
-X = [ones(m, 1) X]; %Concatenating Column Vector 1's(Feature 0) with Column Vector X (Feature 1, Feature 2)
+# Add intercept term to x and X_test
+temp = X
+X = np.ones((m, n+1), dtype=float)
+X[:, 1:] = temp
 
-% Initialize fitting parameters
-initial_theta = zeros(n + 1, 1);
+# Initialize fitting parameters
+initial_theta = np.zeros((n+1,), dtype=float)
 
-% Compute and display initial cost and gradient
-[cost, grad] = costFunction(initial_theta, X, y);
+# Compute and display initial cost and gradient
+cost = costFunction(initial_theta, X, y)
+grad = gradient(initial_theta, X, y)
 
-fprintf('Cost at initial theta (zeros): %f\n', cost);
-fprintf('Gradient at initial theta (zeros): \n');
-fprintf(' %f \n', grad);
-
-fprintf('\nProgram paused. Press enter to continue.\n');
-pause;
-"""
+print('Cost at initial theta (zeros): ', cost)
+print('Gradient at initial theta (zeros): ')
+print(grad)
