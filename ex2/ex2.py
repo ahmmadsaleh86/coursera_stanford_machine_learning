@@ -34,6 +34,73 @@ def plotData(X, y):
     plt.show()
 #END
     
+def plotDecisionBoundary(theta, X, y):
+    # PLOTDECISIONBOUNDARY Plots the data points X and y into a new figure with
+    # the decision boundary defined by theta
+    #   PLOTDECISIONBOUNDARY(theta, X,y) plots the data points with + yellow for the 
+    #   positive examples and o blue for the negative examples.
+    
+    y0 = (np.where(y==0))[0]
+    y1 = (np.where(y==1))[0]
+    
+    plt.scatter(X[y0, 1], X[y0, 2], color="yellow", marker='x')
+    plt.scatter(X[y1, 1], X[y1, 2], color="blue")
+    
+    plot_x1 = np.array([np.amin(X[:, 1]), np.amax(X[:, 1])])
+    plot_x2 = (-1.0/theta[2]) * (theta[1] * plot_x1 + theta[0])
+    
+    plt.plot(plot_x1, plot_x2, color = 'black')
+    
+    plt.title('Training data with decision boundary')
+    plt.xlabel('Exam 1 score')
+    plt.ylabel('Exam 2 score')
+    
+    plt.show()
+    
+"""
+function plotDecisionBoundary(theta, X, y)
+
+
+% Plot Data
+plotData(X(:,2:3), y);
+hold on
+
+if size(X, 2) <= 3
+    % Only need 2 points to define a line, so choose two endpoints
+    plot_x = [min(X(:,2))-2,  max(X(:,2))+2];
+
+    % Calculate the decision boundary line
+    plot_y = (-1./theta(3)).*(theta(2).*plot_x + theta(1));
+
+    % Plot, and adjust axes for better viewing
+    plot(plot_x, plot_y)
+    
+    % Legend, specific for the exercise
+    legend('Admitted', 'Not admitted', 'Decision Boundary')
+    axis([30, 100, 30, 100])
+else
+    % Here is the grid range
+    u = linspace(-1, 1.5, 50);
+    v = linspace(-1, 1.5, 50);
+
+    z = zeros(length(u), length(v));
+    % Evaluate z = theta*x over the grid
+    for i = 1:length(u)
+        for j = 1:length(v)
+            z(i,j) = mapFeature(u(i), v(j))*theta;
+        end
+    end
+    z = z'; % important to transpose z before calling contour
+
+    % Plot z = 0
+    % Notice you need to specify the range [0, 0]
+    contour(u, v, z, [0, 0], 'LineWidth', 2)
+end
+hold off
+
+end
+"""
+    
 def sigmoid(z):
     # SIGMOID Compute sigmoid functoon
     #   g = SIGMOID(z) computes the sigmoid of z.
@@ -122,3 +189,34 @@ grad = gradient(initial_theta, X, y)
 print('Cost at initial theta (zeros): ', cost)
 print('Gradient at initial theta (zeros): ')
 print(grad)
+
+## ============= Part 3: Optimizing using advance optimization problem  =============
+#  In this exercise, you will use a built-in function to find the
+#  optimal parameters theta.
+
+import scipy.optimize as op
+
+#  Run Newton-Conjugate-Gradient to obtain the optimal theta
+theta = op.fmin_ncg(f=costFunction, x0=initial_theta, fprime=gradient, args=(X, y))
+cost = costFunction(theta, X, y)
+
+# Print theta to screen
+print('Cost at theta found by fminunc: ', cost)
+print('theta: ')
+print(theta)
+
+# Plot Boundary
+plotDecisionBoundary(theta, X, y);
+
+# Put some labels 
+hold on;
+# Labels and Legend
+xlabel('Exam 1 score')
+ylabel('Exam 2 score')
+
+# Specified in plot order
+legend('Admitted', 'Not admitted')
+hold off;
+
+fprintf('\nProgram paused. Press enter to continue.\n');
+pause;
