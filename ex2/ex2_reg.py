@@ -194,7 +194,7 @@ m, n = X.shape
 initial_theta = np.zeros((n,), dtype=float)
 
 # Set regularization parameter lambda to 1
-lambd = 1
+lambd = 5
 
 # Compute and display initial cost and gradient for regularized logistic
 # regression
