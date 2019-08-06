@@ -19,8 +19,8 @@
 ## ====================  Functions ====================
 def plotData(X, y):
     # PLOTDATA Plots the data points X and y into a new figure 
-    #   PLOTDATA(x,y) plots the data points with + for the positive examples
-    #   and o for the negative examples. X is assumed to be a Mx2 matrix.    
+    #   PLOTDATA(x,y) plots the data points with green o for the positive examples
+    #   and red x for the negative examples. X is assumed to be a Mx2 matrix.    
     y0 = (np.where(y==0))[0]
     y1 = (np.where(y==1))[0]
     
@@ -37,8 +37,8 @@ def plotData(X, y):
 def plotDecisionBoundary(theta, X, y):
     # PLOTDECISIONBOUNDARY Plots the data points X and y into a new figure with
     # the decision boundary defined by theta
-    #   PLOTDECISIONBOUNDARY(theta, X,y) plots the data points with + red for the 
-    #   positive examples and o green for the negative examples.
+    #   PLOTDECISIONBOUNDARY(theta, X,y) plots the data points with green o for the 
+    #   positive examples and red x for the negative examples.
     
     y0 = (np.where(y==0))[0]
     y1 = (np.where(y==1))[0]
@@ -134,7 +134,7 @@ y = data[:, -1] #Negative or Positive
 #  We start the exercise by first plotting the data to understand the 
 #  the problem we are working with.
 
-print('Plotting data with green . indicating (y = 1) examples and red x indicating (y = 0) examples.\n')
+print('Plotting data with green o indicating (y = 1) examples and red x indicating (y = 0) examples.\n')
 
 import matplotlib.pyplot as plt
 plotData(X, y)
