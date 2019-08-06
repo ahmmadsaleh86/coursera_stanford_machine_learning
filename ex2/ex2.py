@@ -24,8 +24,8 @@ def plotData(X, y):
     y0 = (np.where(y==0))[0]
     y1 = (np.where(y==1))[0]
     
-    plt.scatter(X[y0, 0], X[y0, 1], color="yellow", marker='x')
-    plt.scatter(X[y1, 0], X[y1, 1], color="blue")
+    plt.scatter(X[y0, 0], X[y0, 1], color="red", marker='x')
+    plt.scatter(X[y1, 0], X[y1, 1], color="green")
     
     plt.title('Scatter plot of training data')
     plt.xlabel('Exam 1 score')
@@ -37,14 +37,14 @@ def plotData(X, y):
 def plotDecisionBoundary(theta, X, y):
     # PLOTDECISIONBOUNDARY Plots the data points X and y into a new figure with
     # the decision boundary defined by theta
-    #   PLOTDECISIONBOUNDARY(theta, X,y) plots the data points with + yellow for the 
-    #   positive examples and o blue for the negative examples.
+    #   PLOTDECISIONBOUNDARY(theta, X,y) plots the data points with + red for the 
+    #   positive examples and o green for the negative examples.
     
     y0 = (np.where(y==0))[0]
     y1 = (np.where(y==1))[0]
     
-    plt.scatter(X[y0, 1], X[y0, 2], color="yellow", marker='x')
-    plt.scatter(X[y1, 1], X[y1, 2], color="blue")
+    plt.scatter(X[y0, 1], X[y0, 2], color="red", marker='x')
+    plt.scatter(X[y1, 1], X[y1, 2], color="green")
     
     plot_x1 = np.array([np.amin(X[:, 1]), np.amax(X[:, 1])])
     plot_x2 = (-1.0/theta[2]) * (theta[1] * plot_x1 + theta[0])
@@ -94,6 +94,20 @@ def gradient(theta, X, y):
     delta = (1.0/m) * (np.matmul(X.T, (hX - y))).flatten()
     return delta
 #END
+    
+def predict(theta, X):
+    # PREDICT Predict whether the label is 0 or 1 using learned logistic 
+    # regression parameters theta
+    #   p = PREDICT(theta, X) computes the predictions for X using a 
+    #   threshold at 0.5 (i.e., if sigmoid(theta'*x) >= 0.5, predict 1)
+
+    p = sigmoid(np.matmul(X, theta))
+    p[p >= 0.5] = 1
+    p[p < 0.5] = 0
+
+    return p
+#END    
+    
 
 
 
@@ -120,7 +134,7 @@ y = data[:, -1] #Negative or Positive
 #  We start the exercise by first plotting the data to understand the 
 #  the problem we are working with.
 
-print('Plotting data with blue . indicating (y = 1) examples and yellow x indicating (y = 0) examples.\n')
+print('Plotting data with green . indicating (y = 1) examples and red x indicating (y = 0) examples.\n')
 
 import matplotlib.pyplot as plt
 plotData(X, y)
@@ -165,4 +179,31 @@ print(theta)
 
 # Plot Boundary
 plotDecisionBoundary(theta, X, y)
+
+## ============== Part 4: Predict and Accuracies ==============
+#  After learning the parameters, you'll like to use it to predict the outcomes
+#  on unseen data. In this part, you will use the logistic regression model
+#  to predict the probability that a student with score 45 on exam 1 and 
+#  score 85 on exam 2 will be admitted.
+#
+#  Furthermore, you will compute the training and test set accuracies of 
+#  our model.
+#
+#  Your task is to complete the code in predict.m
+
+#  Predict probability for a student with score 45 on exam 1 
+#  and score 85 on exam 2 
+
+newStudent =np.array([[1, 45, 86]])
+prob = sigmoid(np.matmul(newStudent, theta))
+print('For a student with scores 45 and 85, we predict an admission probability of ', prob)
+
+# Compute accuracy on our training set
+p = predict(theta, X)
+
+acc = (np.sum(p == y) * 100.0)/m
+print('Train Accuracy: ', acc)
+
+
+
 
