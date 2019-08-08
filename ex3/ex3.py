@@ -45,7 +45,7 @@ def displayData(X, example_width = None):
     curr_ex = 1
     for j  in range(display_rows):
         for i in range(display_cols):
-            if curr_ex > m: 
+            if curr_ex >= m: 
                 break
             
             # Copy the patch
@@ -53,18 +53,21 @@ def displayData(X, example_width = None):
             # Get the max value of the patch
             max_val = max(abs(X[curr_ex, :]))
             
-            tmp1 = np.linspace(0, example_height-1, num=example_height)
-            tmp2 = np.linspace(0, example_width-1, num=example_width)
+            tmp1 = np.linspace(0, example_height, num=example_height+1)
+            tmp1 = pad + j * (example_height + pad) + tmp1.astype(int)
+            
+            tmp2 = np.linspace(0, example_width, num=example_width+1)
+            tmp2 = pad + i * (example_width + pad) + tmp2.astype(int)
             #print(pad + (j) * (example_height + pad) + tmp1.astype(int))
             #print(pad + (i) * (example_width + pad) + tmp2.astype(int))
             
-            display_array[pad + j * (example_height + pad) + tmp1.astype(int), pad + i * (example_width + pad) + tmp2.astype(int)] = np.reshape(X[curr_ex, :], (example_height, example_width)) / max_val
+            display_array[tmp1[0]:tmp1[example_height], tmp2[0]:tmp2[example_width]] = np.reshape(X[curr_ex, :], (example_height, example_width)) / max_val
             curr_ex = curr_ex + 1
         
-        if curr_ex > m: 
+        if curr_ex >= m: 
             break 
         
-    h = ax.imshow(display_array, extent=[-1, 1, -1, 1])
+    imgplot = plt.imshow(display_array.T, cmap='gray')
 
 """
 function [h, display_array] = displayData(X, example_width)
@@ -147,13 +150,14 @@ y = np.zeros((m, ), dtype=float)
 y[:] = yMat[:, 0]
 
 import math
-import matplotlib.axes as ax
+import matplotlib.pyplot as plt
 
 # Randomly select 100 data points to display
 rand_indices = np.random.randint(m, size=100)
 sel = X[rand_indices, :]
 
 displayData(sel)
+
 
 
 
