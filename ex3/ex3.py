@@ -40,26 +40,32 @@ def displayData(X, example_width = None):
     
     # Setup blank display
     display_array = - np.ones((pad + display_rows * (example_height + pad), pad + display_cols * (example_width + pad)), dtype=float)
-        
+    
     # Copy each example into a patch on the display array
     curr_ex = 1
     for j  in range(display_rows):
-    	for i in range(display_cols):
-    		if curr_ex > m: 
-    			break
+        for i in range(display_cols):
+            if curr_ex > m: 
+                break
             
-    		# Copy the patch
-    		            
-    		# Get the max value of the patch
-    		max_val = max(abs(X[curr_ex, :]))
-    		display_array[pad + (j - 1) * (example_height + pad) + np.linspace(0, example_height-1, num=example_height), pad + (i - 1) * (example_width + pad) + np.linspace(0, example_width-1, num=example_width)] = np.reshape(X[curr_ex, :], (example_height, example_width)) / max_val
-    		curr_ex = curr_ex + 1
+            # Copy the patch
+            		            
+            # Get the max value of the patch
+            max_val = max(abs(X[curr_ex, :]))
             
-    	if curr_ex > m: 
-    		break 
-    
+            tmp1 = np.linspace(0, example_height-1, num=example_height)
+            tmp2 = np.linspace(0, example_width-1, num=example_width)
+            #print(pad + (j) * (example_height + pad) + tmp1.astype(int))
+            #print(pad + (i) * (example_width + pad) + tmp2.astype(int))
+            
+            display_array[pad + j * (example_height + pad) + tmp1.astype(int), pad + i * (example_width + pad) + tmp2.astype(int)] = np.reshape(X[curr_ex, :], (example_height, example_width)) / max_val
+            curr_ex = curr_ex + 1
+        
+        if curr_ex > m: 
+            break 
+        
     h = ax.imshow(display_array, extent=[-1, 1, -1, 1])
-    
+
 """
 function [h, display_array] = displayData(X, example_width)
 
@@ -133,14 +139,12 @@ import numpy as np
 
 mat = scipy.io.loadmat('ex3data1.mat')
 
-XMat = mat.get('X')
-m = len(XMat)
-X = np.zeros((m, input_layer_size), dtype=float)
-X[:, :] = XMat
+X = mat.get('X')
+m = len(X)
 
 yMat = mat.get('y')
 y = np.zeros((m, ), dtype=float)
-y[:] = yMat
+y[:] = yMat[:, 0]
 
 import math
 import matplotlib.axes as ax
