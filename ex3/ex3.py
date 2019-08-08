@@ -68,58 +68,144 @@ def displayData(X, example_width = None):
             break 
         
     imgplot = plt.imshow(display_array.T, cmap='gray')
+    
+    return display_array
+#END
+    
+def sigmoid(z):
+    # SIGMOID Compute sigmoid functoon
+    #   g = SIGMOID(z) computes the sigmoid of z.
+    g = 1 / (1 + np.exp(-z))
+    return g
+#END
+
+def lrCostFunctionReg(theta, X, y, lambd):
+    #lrCostFunctionReg Compute cost for logistic regression with regularization
+    #   lrCostFunctionReg(theta, X, y, lambda) computes the cost of using
+    #   theta as the parameter for regularized logistic regression 
+    
+    # Initialize some useful values
+    m = len(y) # number of training examples
+    hX = sigmoid(np.matmul(X, theta))
+    
+    J = (1.0 / m) * np.sum(np.multiply(-y, np.log(hX)) - np.multiply((1 - y), np.log(1 - hX))) + (lambd / (2 * m)) * (np.sum(theta[1:]**2))
+    return J
+#END
+
+def lrGradientReg(theta, X, y, lambd):
+    #lrGradientReg Compute gradient for logistic regression with regularization
+    #   lrGradientReg(theta, X, y, lambda) computes 
+    #   the gradient of the cost w.r.t. to the parameters. 
+    
+    # Initialize some useful values
+    m, n = X.shape
+    hX = sigmoid(np.matmul(X, theta))
+    thetaZero = np.zeros((n,), dtype=float)
+    thetaZero[1:] = theta[1:]
+    
+    #grad = (1 / m) * (h_theta - y)' * X
+    delta = (1.0/m) * (np.matmul(X.T, (hX - y))).flatten() + (lambd / m) * thetaZero
+    
+    return delta
+#END
+   
+def oneVsAll(X, y, num_labels, lambd):
+    # ONEVSALL trains multiple logistic regression classifiers and returns all
+    # the classifiers in a matrix all_theta, where the i-th row of all_theta 
+    # corresponds to the classifier for label i
+    #   ONEVSALL(X, y, num_labels, lambda) trains num_labels
+    #   logisitc regression classifiers and returns each of these classifiers
+    #   in a matrix all_theta, where the i-th row of all_theta corresponds 
+    #   to the classifier for label i  
+    
+    # Some useful variables
+    m, n = X.shape
+    
+    all_theta = np.zeros((num_labels, n+1), dtype=float)
+    
+    XOne = np.ones((m, n+1), dtype=float)
+    XOne[:, 1:] = X
+    
+    tmp = np.zeros((num_labels, ), dtype=int)
+    tmp[1: ] = np.linspace(1, num_labels-1, num = num_labels-1)
+    tmp[0] = 10
+    
+    yOnevsAll = np.zeros((m, num_labels), dtype=float)
+    for i in range(m):
+        yOnevsAll[i, :] = tmp == y[i]
+    
+    for i in range(num_labels):
+        all_theta[i, :] = op.fmin_ncg(f=lrCostFunctionReg, x0=all_theta[i,:], fprime=lrGradientReg, args=(XOne, yOnevsAll[:,i], lambd))
+        cost = lrCostFunctionReg(all_theta[i, :], XOne, yOnevsAll[:,i], lambd)
+        print("The cost for classifier ", i, " = ", cost)
+        
+    return all_theta
+
 
 """
-function [h, display_array] = displayData(X, example_width)
+function [all_theta] = oneVsAll(X, y, num_labels, lambda)
+%ONEVSALL trains multiple logistic regression classifiers and returns all
+%the classifiers in a matrix all_theta, where the i-th row of all_theta 
+%corresponds to the classifier for label i
+%   [all_theta] = ONEVSALL(X, y, num_labels, lambda) trains num_labels
+%   logisitc regression classifiers and returns each of these classifiers
+%   in a matrix all_theta, where the i-th row of all_theta corresponds 
+%   to the classifier for label i
 
+% Some useful variables
+m = size(X, 1);
+n = size(X, 2);
 
-% Gray Image
-colormap(gray);
+% You need to return the following variables correctly 
+all_theta = zeros(num_labels, n + 1); % 10 * 401
 
-% Compute rows, cols
-[m n] = size(X);
-example_height = (n / example_width);
+% Add ones to the X data matrix
+X = [ones(m, 1) X];
 
-% Compute number of items to display
-display_rows = floor(sqrt(m));
-display_cols = ceil(m / display_rows);
-
-% Between images padding
-pad = 1;
-
-% Setup blank display
-display_array = - ones(pad + display_rows * (example_height + pad), ...
-                       pad + display_cols * (example_width + pad));
-
-% Copy each example into a patch on the display array
-curr_ex = 1;
-for j = 1:display_rows
-	for i = 1:display_cols
-		if curr_ex > m, 
-			break; 
-		end
-		% Copy the patch
-		
-		% Get the max value of the patch
-		max_val = max(abs(X(curr_ex, :)));
-		display_array(pad + (j - 1) * (example_height + pad) + (1:example_height), ...
-		              pad + (i - 1) * (example_width + pad) + (1:example_width)) = ...
-						reshape(X(curr_ex, :), example_height, example_width) / max_val;
-		curr_ex = curr_ex + 1;
-	end
-	if curr_ex > m, 
-		break; 
-	end
-end
-
-% Display Image
-h = imagesc(display_array, [-1 1]);
-
-% Do not show axis
-axis image off
-
-drawnow;
-
+% ====================== YOUR CODE HERE ======================
+% Instructions: You should complete the following code to train num_labels
+%               logistic regression classifiers with regularization
+%               parameter lambda. 
+%
+% Hint: theta(:) will return a column vector.
+%
+% Hint: You can use y == c to obtain a vector of 1's and 0's that tell use 
+%       whether the ground truth is true/false for this class.
+%
+% Note: For this assignment, we recommend using fmincg to optimize the cost
+%       function. It is okay to use a for-loop (for c = 1:num_labels) to
+%       loop over the different classes.
+%
+%       fmincg works similarly to fminunc, but is more efficient when we
+%       are dealing with large number of parameters.
+%
+% Example Code for fmincg:
+%
+     % Set Initial theta
+     initial_theta = zeros(n + 1, 1);
+     
+     % Set options for fminunc
+     options = optimset('GradObj', 'on', 'MaxIter', 50);
+ 
+     % Run fmincg to obtain the optimal theta
+     % This function will return theta and the cost 
+     
+     % Variable 'X' contains data in dimension (5000 * 400). 
+     % 5000 = Total no. of training examples, 400 = 400 pixels / training sample (digit image)
+     % Total no. Features  = 400
+     
+    for c = 1:num_labels 
+        all_theta(c,:) = fmincg (@(t)(lrCostFunction(t, X, (y == c), lambda)), initial_theta, options);
+        % remember y (5000*1) is an array of labels i.e. it contains actual 
+        % digit names (y==c) will return a vector with values 0 or 1. 1 at places where y==c 
+        
+        % 't' is passed as dummy parameter which is initialized with 'initial_theta' first
+        % then subsequent values are choosen by fmincg [Note: Its not a builtin function like fminunc
+        
+        % fmincg will consider all training data having label c (1-10 note
+        % 0 is mapped to 10) and find the optimal theta vector for it (Classifying white pixels with gray pixels). same
+        % process is repeated for other classes
+    end
 end
 """
 
@@ -158,6 +244,37 @@ sel = X[rand_indices, :]
 
 displayData(sel)
 
+## ============ Part 2: Vectorize Logistic Regression ============
+#  In this part of the exercise, you will reuse your logistic regression
+#  code from the last exercise. You task here is to make sure that your
+#  regularized logistic regression implementation is vectorized. After
+#  that, you will implement one-vs-all classification for the handwritten
+#  digit dataset.
+#
+
+print('\nTraining One-vs-All Logistic Regression...\n')
+
+lambd = 0.1
+
+# each X row corresponds to training data digit image 20*20 pixel
+# each y row contains label for the training data i.e. actual name of the
+# digit
+
+import scipy.optimize as op
+
+all_theta = oneVsAll(X, y, num_labels, lambd)
+
+"""
+fprintf('Program paused. Press enter to continue.\n');
+pause;
+
+
+%% ================ Part 3: Predict for One-Vs-All ================
+%  After ...
+pred = predictOneVsAll(all_theta, X); % all_theta 10 * 401 mat
+
+fprintf('\nTraining Set Accuracy: %f\n', mean(double(pred == y)) * 100);
+"""
 
 
 
