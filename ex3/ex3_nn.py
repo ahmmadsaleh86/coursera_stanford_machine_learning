@@ -68,6 +68,53 @@ def displayData(X, example_width = None):
     
     return display_array
 #END
+    
+def sigmoid(z):
+    # SIGMOID Compute sigmoid functoon
+    #   g = SIGMOID(z) computes the sigmoid of z.
+    g = 1 / (1 + np.exp(-z))
+    return g
+#END
+
+def predict(Theta1, Theta2, X):
+    #PREDICT Predict the label of an input given a trained neural network
+    #   p = PREDICT(Theta1, Theta2, X) outputs the predicted label of X given the
+    #   trained weights of a neural network (Theta1, Theta2)
+    
+    # Useful values
+    m = (X.shape)[0]
+    num_labels = (Theta2.shape)[0]
+    
+    # You need to return the following variables correctly 
+    #p = np.zeros((m, ), dtype=float)
+    
+    # ====================== YOUR CODE HERE ======================
+    # Instructions: Complete the following code to make predictions using
+    #               your learned neural network. You should set p to a 
+    #               vector containing labels between 1 to num_labels.
+    #
+    # Hint: The max function might come in useful. In particular, the max
+    #       function can also return the index of the max element, for more
+    #       information see 'help max'. If your examples are in rows, then, you
+    #       can use max(A, [], 2) to obtain the max for each row.
+    #
+    XOne = np.ones((m, (X.shape)[1] + 1), dtype=float)
+    XOne[:, 1:] = X
+    
+    z = np.matmul(Theta1, XOne.T)
+    a2 = np.ones(((Theta1.shape)[0] + 1, m), dtype=float)
+    a2[1:, :] = sigmoid(z)
+    
+    z = np.matmul(Theta2, a2)
+    a3 = sigmoid(z)
+    
+    p = np.argmax(a3, 0) + 1 
+    #The plus one because this example is developed for octave which index start from one
+    
+    p[ p==0 ] = 10
+    
+    return p
+#END
 
 ## =========== Part 0: Setup the Parameters =============
 ## Setup the parameters you will use for this exercise
@@ -114,6 +161,17 @@ print('\nLoading Saved Neural Network Parameters ...\n')
 
 # Load the weights into variables Theta1 and Theta2
 mat = scipy.io.loadmat('ex3weights.mat')
-theta1 = mat.get('Theta1')
-theta2 = mat.get('Theta2')
+Theta1 = mat.get('Theta1')
+Theta2 = mat.get('Theta2')
+
+## ================= Part 3: Implement Predict =================
+#  After training the neural network, we would like to use it to predict
+#  the labels. You will now implement the "predict" function to use the
+#  neural network to predict the labels of the training set. This lets
+#  you compute the training set accuracy.
+
+pred = predict(Theta1, Theta2, X)
+
+acc = acc = (np.sum(pred == y) * 100.0)/m
+print('\nTraining Set Accuracy: ', acc)
 
