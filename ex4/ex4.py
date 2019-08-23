@@ -7,9 +7,9 @@
 #  linear exercise. You will need to complete the following functions 
 #  in this exericse:
 #
-#     sigmoidGradient.m
-#     randInitializeWeights.m
-#     nnCostFunction.m
+#     sigmoidGradient
+#     randInitializeWeights
+#     nnCostFunction
 #
 #  For this exercise, you will not need to change any code in this file,
 #  or any other files other than those mentioned above.
@@ -70,6 +70,27 @@ def displayData(X, example_width = None):
     
     return display_array
 #END
+
+def randInitializeWeights(L_in, L_out):
+    # RANDINITIALIZEWEIGHTS Randomly initialize the weights of a layer with L_in
+    # incoming connections and L_out outgoing connections
+    #   RANDINITIALIZEWEIGHTS(L_in, L_out) randomly initializes the weights 
+    #   of a layer with L_in incoming connections and L_out outgoing 
+    #   connections. 
+    #
+    #   Note that W should be set to a matrix of size(L_out, 1 + L_in) as
+    #   the column row of W handles the "bias" terms
+    #
+
+    # ====================== YOUR CODE HERE ======================
+    # Instructions: Initialize W randomly so that we break the symmetry while
+    #               training the neural network.
+    
+    epsilone = 0.12
+    W = np.random.uniform(low=-epsilone, high=epsilone, size=(L_out, L_in + 1))
+    
+    return W
+#END
     
 def sigmoid(z):
     # SIGMOID Compute sigmoid functoon
@@ -89,7 +110,23 @@ def h(Theta1, Theta2, XOne):
     return A3
 #END
 
-   
+def sigmoidGradient(z):
+    # SIGMOIDGRADIENT returns the gradient of the sigmoid function
+    # evaluated at z
+    #   SIGMOIDGRADIENT(z) computes the gradient of the sigmoid function
+    #   evaluated at z. This should work regardless if z is a matrix or a
+    #   vector. In particular, if z is a vector or matrix, you should return
+    #   the gradient for each element.
+    # ====================== YOUR CODE HERE ======================
+    # Instructions: Compute the gradient of the sigmoid function evaluated at
+    #               each value of z (z can be a matrix, vector or scalar).
+    g = sigmoid(z)
+    
+    gGradient = np.multiply(g, (1 - g))
+    
+    return gGradient
+#END
+    
 def nnCostFunction(nn_params,
                    input_layer_size,
                    hidden_layer_size,
@@ -100,13 +137,10 @@ def nnCostFunction(nn_params,
     # NNCOSTFUNCTION Implements the neural network cost function for a two layer
     # neural network which performs classification
     #   NNCOSTFUNCTON(nn_params, hidden_layer_size, num_labels, ...
-    #   X, y, lambda) computes the cost and gradient of the neural network. The
+    #   X, y, lambda) computes the cost of the neural network. The
     #   parameters for the neural network are "unrolled" into the vector
     #   nn_params and need to be converted back into the weight matrices. 
     # 
-    #   The returned parameter grad should be a "unrolled" vector of the
-    #   partial derivatives of the neural network.
-    #
     
     # Reshape nn_params back into the parameters Theta1 and Theta2, the weight matrices
     # for our 2 layer neural network
@@ -123,7 +157,7 @@ def nnCostFunction(nn_params,
     # Part 1: Feedforward the neural network and return the cost in the
     #         variable J. After implementing Part 1, you can verify that your
     #         cost function computation is correct by verifying the cost
-    #         computed in ex4.m
+    #         computed
     
     #Adding the x0 to the training set
     XOne = np.ones((m, input_layer_size + 1), dtype=float)
@@ -148,6 +182,81 @@ def nnCostFunction(nn_params,
     J += (lambd / (2 * m)) * (np.sum(np.power(Theta1_reg, 2)) + np.sum(np.power(Theta2_reg, 2)))
     
     return J
+
+def nnGradient(nn_params,
+               input_layer_size,
+               hidden_layer_size,
+               num_labels,
+               X,
+               y,
+               lambd):
+    # NNGradient Implements the gradient for a two layer
+    # neural network which performs classification
+    #   NNGradient(nn_params, hidden_layer_size, num_labels, ...
+    #   X, y, lambda) computes the gradient of the neural network. The
+    #   parameters for the neural network are "unrolled" into the vector
+    #   nn_params and need to be converted back into the weight matrices. 
+    # 
+    #   The returned parameter grad should be a "unrolled" vector of the
+    #   partial derivatives of the neural network.
+    #
+    
+    # Reshape nn_params back into the parameters Theta1 and Theta2, the weight matrices
+    # for our 2 layer neural network
+    Theta1 = np.reshape(nn_params[:hidden_layer_size * (input_layer_size + 1)], (hidden_layer_size, input_layer_size + 1))
+    Theta2 = np.reshape(nn_params[hidden_layer_size * (input_layer_size + 1):], (num_labels, hidden_layer_size + 1))
+    
+    # Setup some useful variables
+    m = (X.shape)[0]
+
+    # ====================== YOUR CODE HERE ======================
+    # Instructions: You should complete the code by working through the
+    #               following parts.
+    #
+    # Part 2: Implement the backpropagation algorithm to compute the gradients
+    #         Theta1_grad and Theta2_grad. You should return the partial derivatives of
+    #         the cost function with respect to Theta1 and Theta2 in Theta1_grad and
+    #         Theta2_grad, respectively. After implementing Part 2, you can check
+    #         that your implementation is correct by running checkNNGradients
+    #
+    #         Note: The vector y passed into the function is a vector of labels
+    #               containing values from 1..K. You need to map this vector into a 
+    #               binary vector of 1's and 0's to be used with the neural network
+    #               cost function.
+    # 
+            
+    #Adding the x0 to the training set
+    A1 = np.ones((m, input_layer_size + 1), dtype=float)
+    A1[:, 1:] = X
+    
+    #Convert y to binary presentation
+    yD = np.zeros((m, num_labels), dtype=float)
+    y = y.astype(int)
+    for i in range(m):
+        yD[i, y[i]-1] = 1
+    
+    #Applying feedforward propagation
+    Z2 = np.matmul(A1, Theta1.T)
+    A2 = np.ones(((Z2.shape)[0], (Z2.shape)[1] + 1), dtype=float)
+    A2[:, 1:] = sigmoid(Z2)
+    
+    Z3 = np.matmul(A2, Theta2.T)
+    A3 = sigmoid(Z3)
+    
+    #Applying back propagation propagation
+    delta3 = A3 - yD
+    
+    delta2 = np.multiply(np.matmul(delta3, Theta2), sigmoidGradient(Z2))
+    delta2 = delta2[:, 1:]
+    
+    Theta2_grad = (1.0 / m) * np.matmul(delta3.T, A2)
+    
+    Theta1_grad = (1.0 / m) * np.matmul(delta2.T, A1)
+    
+    
+    
+
+
 """
 function [J grad] = nnCostFunction(nn_params, ...
                                    input_layer_size, ...
@@ -237,6 +346,53 @@ grad = [Theta1_grad(:) ; Theta2_grad(:)];
 
 end
 """
+
+## ====================  Gradient Checking Functions ====================
+
+def debugInitializeWeights(fan_out, fan_in):
+    # DEBUGINITIALIZEWEIGHTS Initialize the weights of a layer with fan_in
+    # incoming connections and fan_out outgoing connections using a fixed
+    # strategy, this will help you later in debugging
+    #   DEBUGINITIALIZEWEIGHTS(fan_in, fan_out) initializes the weights 
+    #   of a layer with fan_in incoming connections and fan_out outgoing 
+    #   connections using a fix set of values
+    #
+    #   Note that W should be set to a matrix of size(fan_out, 1 + fan_in) as
+    #   the first row of W handles the "bias" terms
+    #
+    
+    # Initialize W using "sin", this ensures that W is always of the same
+    # values and will be useful for debugging
+    numElement = fan_out * (fan_in + 1)
+    W = np.linspace(start=1, stop=numElement, num=numElement)
+    W = np.sin(W)
+    W = np.reshape(W, (fan_out, fan_in+1)) / 10
+    
+    return W
+#END
+
+def checkNNGradients(lambd = 0):
+    # CHECKNNGRADIENTS Creates a small neural network to check the
+    # backpropagation gradients
+    #   CHECKNNGRADIENTS(lambda) Creates a small neural network to check the
+    #   backpropagation gradients, it will output the analytical gradients
+    #   produced by your backprop code and the numerical gradients (computed
+    #   using computeNumericalGradient). These two gradient computations should
+    #   result in very similar values.
+    #
+    
+    input_layer_size = 3
+    hidden_layer_size = 5
+    num_labels = 3
+    m = 5
+    
+    # We generate some 'random' test data
+    Theta1 = debugInitializeWeights(hidden_layer_size, input_layer_size)
+    Theta2 = debugInitializeWeights(num_labels, hidden_layer_size)
+    
+    # Reusing debugInitializeWeights to generate X
+    X
+    
 
 
 ## =========== Part 0: Setup the Parameters =============
@@ -341,20 +497,33 @@ J = nnCostFunction(nn_params,
 print('Cost at parameters (loaded from ex4weights): ', J)
 print('(this value should be about 0.383770)')
 
-"""
-%% ================ Part 5: Sigmoid Gradient  ================
-%  Before you start implementing the neural network, you will first
-%  implement the gradient for the sigmoid function. You should complete the
-%  code in the sigmoidGradient.m file.
-%
 
-fprintf('\nEvaluating sigmoid gradient...\n')
+## ================ Part 5: Sigmoid Gradient  ================
+#  Before you start implementing the neural network, you will first
+#  implement the gradient for the sigmoid function. You should complete the
+#  code in the sigmoidGradient.m file.
+#
 
-g = sigmoidGradient([1 -0.5 0 0.5 1]);
-fprintf('Sigmoid gradient evaluated at [1 -0.5 0 0.5 1]:\n  ');
-fprintf('%f ', g);
-fprintf('\n\n');
+print('\nEvaluating sigmoid gradient...\n')
 
-fprintf('Program paused. Press enter to continue.\n');
-pause;
-"""
+g = sigmoidGradient(np.array([1, -0.5, 0, 0.5, 1]))
+
+print('Sigmoid gradient evaluated at [1 -0.5 0 0.5 1]:\n  ')
+print(g)
+
+## ================ Part 6: Initializing Pameters ================
+#  In this part of the exercise, you will be starting to implment a two
+#  layer neural network that classifies digits. You will start by
+#  implementing a function to initialize the weights of the neural network
+#  (randInitializeWeights)
+
+print('\nInitializing Neural Network Parameters ...\n')
+
+initial_Theta1 = randInitializeWeights(input_layer_size, hidden_layer_size)
+initial_Theta2 = randInitializeWeights(hidden_layer_size, num_labels)
+
+# Unroll parameters
+initial_nn_params = np.zeros((hidden_layer_size * (input_layer_size + 1) + num_labels * (hidden_layer_size + 1), ), dtype=float)
+initial_nn_params[:hidden_layer_size * (input_layer_size + 1)] = initial_Theta1.ravel()
+initial_nn_params[hidden_layer_size * (input_layer_size + 1):] = initial_Theta2.ravel()
+
