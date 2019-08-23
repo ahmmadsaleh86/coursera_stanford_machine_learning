@@ -141,6 +141,12 @@ def nnCostFunction(nn_params,
     
     J = (1.0 / m) * (np.sum(np.multiply(-yD, np.log(hX)) - np.multiply((1 - yD), np.log(1 - hX))))
     
+    #regularization
+    Theta1_reg = Theta1[:, 1:]
+    Theta2_reg = Theta2[:, 1:]
+    
+    J += (lambd / (2 * m)) * (np.sum(np.power(Theta1_reg, 2)) + np.sum(np.power(Theta2_reg, 2)))
+    
     return J
 """
 function [J grad] = nnCostFunction(nn_params, ...
@@ -160,19 +166,6 @@ function [J grad] = nnCostFunction(nn_params, ...
 %
 
 
-
-J = (1/m) * sum ( sum ( (-y_new) .* log(h_theta) - (1-y_new) .* log(1-h_theta) ));
-
-% Note we should not regularize the terms that correspond to the bias. 
-% For the matrices Theta1 and Theta2, this corresponds to the first column of each matrix.
-t1 = Theta1(:,2:size(Theta1,2));
-t2 = Theta2(:,2:size(Theta2,2));
-
-% Regularization
-Reg = lambda  * (sum( sum ( t1.^ 2 )) + sum( sum ( t2.^ 2 ))) / (2*m);
-
-% Regularized cost function
-J = J + Reg;
 
 % Part 2: Implement the backpropagation algorithm to compute the gradients
 %         Theta1_grad and Theta2_grad. You should return the partial derivatives of
@@ -282,8 +275,6 @@ sel = X[rand_indices, :]
 
 displayData(sel)
 
-
-
 ## ================ Part 2: Loading Parameters ================
 # In this part of the exercise, we load some pre-initialized 
 # neural network parameters.
@@ -329,3 +320,41 @@ J = nnCostFunction(nn_params,
 print('Cost at parameters (loaded from ex4weights):  ', J)
 print('(this value should be about 0.287629)')
 
+## =============== Part 4: Implement Regularization ===============
+#  Once your cost function implementation is correct, you should now
+#  continue to implement the regularization with the cost.
+#
+
+print('\nChecking Cost Function (w/ Regularization) ... \n')
+
+# Weight regularization parameter (we set this to 1 here).
+lambd = 1
+
+J = nnCostFunction(nn_params,
+                   input_layer_size,
+                   hidden_layer_size,
+                   num_labels,
+                   X,
+                   y,
+                   lambd)
+
+print('Cost at parameters (loaded from ex4weights): ', J)
+print('(this value should be about 0.383770)')
+
+"""
+%% ================ Part 5: Sigmoid Gradient  ================
+%  Before you start implementing the neural network, you will first
+%  implement the gradient for the sigmoid function. You should complete the
+%  code in the sigmoidGradient.m file.
+%
+
+fprintf('\nEvaluating sigmoid gradient...\n')
+
+g = sigmoidGradient([1 -0.5 0 0.5 1]);
+fprintf('Sigmoid gradient evaluated at [1 -0.5 0 0.5 1]:\n  ');
+fprintf('%f ', g);
+fprintf('\n\n');
+
+fprintf('Program paused. Press enter to continue.\n');
+pause;
+"""
