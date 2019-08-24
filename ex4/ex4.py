@@ -254,6 +254,13 @@ def nnGradient(nn_params,
     
     Theta1_grad = (1.0 / m) * np.matmul(delta2.T, A1)
     
+    #regularization
+    Theta1_reg = Theta1[:, 1:]
+    Theta2_reg = Theta2[:, 1:]
+    
+    Theta1_grad[:, 1:] += (lambd / m) * Theta1_reg
+    Theta2_grad[:, 1:] += (lambd / m) * Theta2_reg
+    
     # Unroll gradients
     Theta1_grad_num = (Theta1_grad.shape)[0] * (Theta1_grad.shape)[1]
     Theta2_grad_num = (Theta2_grad.shape)[0] * (Theta2_grad.shape)[1]
@@ -637,6 +644,31 @@ initial_nn_params[hidden_layer_size * (input_layer_size + 1):] = initial_Theta2.
 
 #  Check gradients by running checkNNGradients
 #checkNNGradients()
+
+## =============== Part 8: Implement Regularization ===============
+#  Once your backpropagation implementation is correct, you should now
+#  continue to implement the regularization with the cost and gradient.
+#
+
+print('\nChecking Backpropagation (w/ Regularization) ... \n')
+
+#  Check gradients by running checkNNGradients
+lambd = 3
+checkNNGradients(lambd)
+
+# Also output the costFunction debugging values
+debug_J  = nnCostFunction(nn_params,
+                          input_layer_size, 
+                          hidden_layer_size,
+                          num_labels,
+                          X,
+                          y,
+                          lambd)
+
+print('\n\nCost at (fixed) debugging parameters (w/ lambda = 3): ', debug_J)
+print('(this value should be about 0.576051)\n\n')
+
+
 
 
 
