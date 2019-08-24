@@ -668,7 +668,55 @@ debug_J  = nnCostFunction(nn_params,
 print('\n\nCost at (fixed) debugging parameters (w/ lambda = 3): ', debug_J)
 print('(this value should be about 0.576051)\n\n')
 
+## =================== Part 9: Training NN ===================
+#  You have now implemented all the code necessary to train a neural 
+#  network. To train your neural network. Recall that the
+#  advanced optimizers are able to train our cost functions efficiently as
+#  long as we provide them with the gradient computations.
+#
+import scipy.optimize as op
+
+print('\nTraining Neural Network... \n')
 
 
+#  You should also try different values of lambd
+lambd = 1
 
+nn_params = op.fmin_ncg(f=nnCostFunction,
+                        x0=initial_nn_params,
+                        fprime=nnGradient,
+                        maxiter=400,
+                        args=(input_layer_size, hidden_layer_size, num_labels, X, y, lambd))
+
+cost = nnCostFunction(nn_params, 
+                      input_layer_size,
+                      hidden_layer_size,
+                      num_labels,
+                      X,
+                      y,
+                      lambd)
+
+# Obtain Theta1 and Theta2 back from nn_params
+Theta1 = np.reshape(nn_params[:hidden_layer_size * (input_layer_size + 1)], (hidden_layer_size, input_layer_size + 1))
+Theta2 = np.reshape(nn_params[hidden_layer_size * (input_layer_size + 1):], (num_labels, hidden_layer_size + 1))
+
+## ================= Part 10: Visualize Weights =================
+#  You can now "visualize" what the neural network is learning by
+#  displaying the hidden units to see what features they are capturing in 
+#  the data.
+
+print('\nVisualizing Neural Network... \n')
+
+displayData(Theta1[:, 1:])
+"""
+## ================= Part 10: Implement Predict =================
+#  After training the neural network, we would like to use it to predict
+#  the labels. You will now implement the "predict" function to use the
+#  neural network to predict the labels of the training set. This lets
+#  you compute the training set accuracy.
+
+pred = predict(Theta1, Theta2, X)
+
+print('\nTraining Set Accuracy: %f\n', mean(double(pred == y)) * 100)
+"""
 
