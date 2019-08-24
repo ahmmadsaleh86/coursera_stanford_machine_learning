@@ -246,16 +246,24 @@ def nnGradient(nn_params,
     #Applying back propagation propagation
     delta3 = A3 - yD
     
-    delta2 = np.multiply(np.matmul(delta3, Theta2), sigmoidGradient(Z2))
+    delta2 = np.matmul(delta3, Theta2)
     delta2 = delta2[:, 1:]
+    delta2 = np.multiply(delta2, sigmoidGradient(Z2))
     
     Theta2_grad = (1.0 / m) * np.matmul(delta3.T, A2)
     
     Theta1_grad = (1.0 / m) * np.matmul(delta2.T, A1)
     
+    # Unroll gradients
+    Theta1_grad_num = (Theta1_grad.shape)[0] * (Theta1_grad.shape)[1]
+    Theta2_grad_num = (Theta2_grad.shape)[0] * (Theta2_grad.shape)[1]
     
+    grad = np.zeros((Theta1_grad_num + Theta2_grad_num, ), dtype=float)
+    grad[:Theta1_grad_num] = Theta1_grad.ravel()
+    grad[Theta1_grad_num:] = Theta2_grad.ravel()
     
-
+    return grad
+    
 
 """
 function [J grad] = nnCostFunction(nn_params, ...
@@ -370,6 +378,57 @@ def debugInitializeWeights(fan_out, fan_in):
     
     return W
 #END
+    
+def computeNumericalGradient(nn_params,
+               input_layer_size,
+               hidden_layer_size,
+               num_labels,
+               X,
+               y,
+               lambd):
+    # COMPUTENUMERICALGRADIENT Computes the gradient using "finite differences"
+    # and gives us a numerical estimate of the gradient.
+    #   COMPUTENUMERICALGRADIENT(nn_params, input_layer_size, hidden_layer_size,
+    #   num_labels, X, y, lambd) computes the numerical gradient of the
+    #   function J around theta.
+    #
+    # Notes: The following code implements numerical gradient checking, and 
+    #        returns the numerical gradient.It sets numgrad(i) to (a numerical 
+    #        approximation of) the partial derivative of J with respect to the 
+    #        i-th input argument, evaluated at theta. (i.e., numgrad(i) should 
+    #        be the (approximately) the partial derivative of J with respect 
+    #        to theta(i).)
+    #
+    
+    numgrad = np.zeros(nn_params.shape, dtype=float)
+    perturb = np.zeros(nn_params.shape, dtype=float)
+    e = 1e-4
+    
+    for i in range((nn_params.shape)[0]):
+        perturb[i] = e
+        loss1 = nnCostFunction(nn_params - perturb,
+               input_layer_size,
+               hidden_layer_size,
+               num_labels,
+               X,
+               y,
+               lambd)
+        
+        loss2 = nnCostFunction(nn_params + perturb,
+               input_layer_size,
+               hidden_layer_size,
+               num_labels,
+               X,
+               y,
+               lambd)
+        
+        numgrad[i] = (loss2 - loss1) / (2 * e)
+        
+        perturb[i] = 0
+    
+    return numgrad
+#END
+
 
 def checkNNGradients(lambd = 0):
     # CHECKNNGRADIENTS Creates a small neural network to check the
@@ -391,9 +450,50 @@ def checkNNGradients(lambd = 0):
     Theta2 = debugInitializeWeights(num_labels, hidden_layer_size)
     
     # Reusing debugInitializeWeights to generate X
-    X
+    X = debugInitializeWeights(m, input_layer_size-1)
+    y = 1 + np.linspace(start=1, stop=m, num=m) % num_labels
     
-
+    # Unroll parameters 
+    nn_params = np.zeros((hidden_layer_size * (input_layer_size + 1) + num_labels * (hidden_layer_size + 1), ), dtype=float)
+    nn_params[:hidden_layer_size * (input_layer_size + 1)] = Theta1.ravel()
+    nn_params[hidden_layer_size * (input_layer_size + 1):] = Theta2.ravel()
+    
+    cost = nnCostFunction(nn_params,
+                   input_layer_size,
+                   hidden_layer_size,
+                   num_labels,
+                   X,
+                   y,
+                   lambd)  
+    grad = nnGradient(nn_params,
+               input_layer_size,
+               hidden_layer_size,
+               num_labels,
+               X,
+               y,
+               lambd)
+    numgrad = computeNumericalGradient(nn_params,
+               input_layer_size,
+               hidden_layer_size,
+               num_labels,
+               X,
+               y,
+               lambd)
+    
+    # Visually examine the two gradient computations.
+    print(numgrad)
+    print(grad)
+    
+    # Evaluate the norm of the difference between two solutions.  
+    # If you have a correct implementation, and assuming you used EPSILON = 0.0001 
+    # then diff below should be less than 1e-9
+    diff = np.linalg.norm(numgrad - grad) / np.linalg.norm(numgrad + grad)
+    
+    print('If your backpropagation implementation is correct, then \n',
+             'the relative difference will be small (less than 1e-9). \n',
+             '\nRelative Difference: ', diff)
+    return numgrad
+#END
 
 ## =========== Part 0: Setup the Parameters =============
 ## Setup the parameters you will use for this exercise
@@ -526,4 +626,17 @@ initial_Theta2 = randInitializeWeights(hidden_layer_size, num_labels)
 initial_nn_params = np.zeros((hidden_layer_size * (input_layer_size + 1) + num_labels * (hidden_layer_size + 1), ), dtype=float)
 initial_nn_params[:hidden_layer_size * (input_layer_size + 1)] = initial_Theta1.ravel()
 initial_nn_params[hidden_layer_size * (input_layer_size + 1):] = initial_Theta2.ravel()
+
+## =============== Part 7: Implement Backpropagation ===============
+#  Once your cost matches up with ours, you should proceed to implement the
+#  backpropagation algorithm for the neural network. You should add to the
+#  code you've written in nnCostFunction.m to return the partial
+#  derivatives of the parameters.
+#
+#print('\nChecking Backpropagation... \n');
+
+#  Check gradients by running checkNNGradients
+#checkNNGradients()
+
+
 
