@@ -109,6 +109,24 @@ def h(Theta1, Theta2, XOne):
     
     return A3
 #END
+    
+def predict(Theta1, Theta2, X):
+   
+    # Setup some useful variables
+    m, n = X.shape
+    
+    #Adding the x0 to the training set
+    XOne = np.ones((m, n+1), dtype=float)
+    XOne[:, 1:] = X
+    
+    #Apply feedforward to find the result
+    hX = h(Theta1, Theta2, XOne)
+    
+    p = np.argmax(hX, axis=1)
+    p += 1
+    p[p == 11] = 10
+    
+    return p
 
 def sigmoidGradient(z):
     # SIGMOIDGRADIENT returns the gradient of the sigmoid function
@@ -680,12 +698,12 @@ print('\nTraining Neural Network... \n')
 
 
 #  You should also try different values of lambd
-lambd = 1
+lambd = 3
 
 nn_params = op.fmin_ncg(f=nnCostFunction,
                         x0=initial_nn_params,
                         fprime=nnGradient,
-                        maxiter=400,
+                        maxiter=50,
                         args=(input_layer_size, hidden_layer_size, num_labels, X, y, lambd))
 
 cost = nnCostFunction(nn_params, 
@@ -708,7 +726,7 @@ Theta2 = np.reshape(nn_params[hidden_layer_size * (input_layer_size + 1):], (num
 print('\nVisualizing Neural Network... \n')
 
 displayData(Theta1[:, 1:])
-"""
+
 ## ================= Part 10: Implement Predict =================
 #  After training the neural network, we would like to use it to predict
 #  the labels. You will now implement the "predict" function to use the
@@ -717,6 +735,8 @@ displayData(Theta1[:, 1:])
 
 pred = predict(Theta1, Theta2, X)
 
-print('\nTraining Set Accuracy: %f\n', mean(double(pred == y)) * 100)
-"""
+acc = (np.sum(pred == y) * 100.0)/m
+
+print('\nTraining Set Accuracy: ', acc)
+
 
