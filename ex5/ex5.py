@@ -21,6 +21,33 @@ def plotData(X, y):
     plt.xlabel('Change in water level (x)')
     plt.ylabel('Water flowing out of the dam (y)')
 #END
+    
+def hX(XOne, theta):
+    return np.matmul(XOne, theta)
+#END
+    
+def linearRegCostFunction(X, y, theta, lambd):
+    # LINEARREGCOSTFUNCTION Compute cost for regularized linear 
+    # regression with multiple variables
+    #   LINEARREGCOSTFUNCTION(X, y, theta, lambda) computes the 
+    #   cost of using theta as the parameter for linear regression to fit the 
+    #   data points in X and y. Returns the cost in J
+    
+    # Initialize some useful values
+    m, n = X.shape
+    
+    XOne = np.ones((m, n+1), dtype=float)
+    XOne[:, 1:] = X
+    
+    J = (1 / (2 * m)) * np.sum(np.power(hX(XOne, theta) - y, 2))
+    
+    #Regularization
+    thetaReg = theta[1:]
+    J += (lambd / (2 * m)) * np.sum(np.power(thetaReg, 2))
+    
+    return J
+#END
+  
 
 ## =========== Part 1: Loading and Visualizing Data =============
 #  We start the exercise by first loading and visualizing the dataset. 
@@ -55,8 +82,25 @@ ytest = np.zeros(((yMat.shape)[0], ), dtype=float)
 ytest[:] = yMat[:, 0]
 
 # m = Number of examples
-m = (X.shape)[0]
+m, n = X.shape
 
 # Plot training data
 import matplotlib.pyplot as plt
 plotData(X,y)
+
+
+## =========== Part 2: Regularized Linear Regression Cost =============
+#  You should now implement the cost function for regularized linear 
+#  regression. 
+#
+
+theta = np.ones((n+1, ), dtype=float)
+lambd = 1
+
+J = linearRegCostFunction(X, y, theta, lambd)
+
+print('Cost at theta = [1 ; 1]: ', J)
+print('(this value should be about 303.993192)\n')
+
+
+
