@@ -47,6 +47,31 @@ def linearRegCostFunction(X, y, theta, lambd):
     
     return J
 #END
+    
+def linearRegGradient(X, y, theta, lambd):
+    # LINEARREGGRADIENT Compute gradient for regularized linear 
+    # regression with multiple variables
+    #   LINEARREGGRADIENT(X, y, theta, lambda) computes the 
+    #   gradient of using theta as the parameter for linear regression. 
+    #   Returns the gradient in grad
+    
+    # Initialize some useful values
+    m, n = X.shape
+    
+    XOne = np.ones((m, n+1), dtype=float)
+    XOne[:, 1:] = X
+    
+    grad = (1 / m) * (np.matmul(XOne.T, hX(XOne, theta) - y)).ravel()
+    
+    #Regularization
+    thetaReg = np.zeros((n+1, ), dtype=float)
+    thetaReg[1:] = theta[1:]
+    
+    grad += (lambd / m) * thetaReg
+    
+    return grad
+#END
+ 
   
 
 ## =========== Part 1: Loading and Visualizing Data =============
@@ -101,6 +126,17 @@ J = linearRegCostFunction(X, y, theta, lambd)
 
 print('Cost at theta = [1 ; 1]: ', J)
 print('(this value should be about 303.993192)\n')
+
+## =========== Part 3: Regularized Linear Regression Gradient =============
+#  You should now implement the gradient for regularized linear 
+#  regression.
+#
+
+grad = linearRegGradient(X, y, theta, lambd)
+
+print('Gradient at theta = [1 ; 1]: ', grad)
+print('\n(this value should be about [-15.303016; 598.250744])\n')
+
 
 
 
