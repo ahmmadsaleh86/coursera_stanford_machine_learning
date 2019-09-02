@@ -15,6 +15,13 @@
 #  or any other files other than those mentioned above.
 #
 
+## ====================  Import ====================
+import scipy.io
+import numpy as np
+import matplotlib.pyplot as plt
+import scipy.optimize as op
+
+
 ## ====================  Functions ====================
 def plotData(X, y):
     plt.scatter(X, y, c='red', marker='x')        
@@ -64,6 +71,8 @@ def plotLearningCurve(error_train, error_val):
     plt.title('Learning curve for linear regression')
     plt.xlabel('Number of training examples')
     plt.ylabel('Error')
+    
+    plt.show()
 #END
     
     
@@ -207,9 +216,6 @@ print('Loading and Visualizing Data ...\n')
 
 # Load from ex5data1: 
 # You will have X, y, Xval, yval, Xtest, ytest in your environment
-import scipy.io
-import numpy as np
-
 mat = scipy.io.loadmat('ex5data1.mat')
 
 X = mat.get('X')
@@ -232,7 +238,6 @@ ytest[:] = yMat[:, 0]
 m, n = X.shape
 
 # Plot training data
-import matplotlib.pyplot as plt
 plotData(X,y)
 
 
@@ -270,8 +275,6 @@ print('\n(this value should be about [-15.303016; 598.250744])\n')
 #
 
 #  Train linear regression with lambd = 0
-import scipy.optimize as op
-
 lambd = 0
 theta = trainLinearReg(X, y, lambd)
 
