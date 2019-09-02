@@ -119,6 +119,14 @@ def trainLinearReg(X, y, lambd=0):
 #END
     
 def learningCurve(X, y, Xval, yval, lambd=0):
+    # LEARNINGCURVE Generates the train and cross validation set errors needed 
+    # to plot a learning curve
+    #       LEARNINGCURVE(X, y, Xval, yval, lambda) returns the train and
+    #       cross validation set errors for a learning curve. In particular, 
+    #       it returns two vectors of the same length - error_train and 
+    #       error_val. Then, error_train(i) contains the training error for
+    #       i examples (and similarly for error_val(i)).
+    #
     
     # Initialize some useful values
     m = (X.shape)[0]
@@ -139,6 +147,32 @@ def learningCurve(X, y, Xval, yval, lambd=0):
         
     return error_train, error_val
 #END
+    
+def polyFeatures(X, p):
+    # Initialize some useful values
+    m = (X.shape)[0]
+    
+    X_poly = np.ones((m, p), dtype=float)
+    
+    for i in range(1, p+1):
+        X_poly[:, i-1] = np.power(X[:, 0], i)
+    
+    return X_poly
+#END
+    
+def featureNormalize(X):
+    # FEATURENORMALIZE(X) returns a normalized version of X where
+    # the mean value of each feature is 0 and the standard deviation
+    # is 1. This is often a good preprocessing step to do when
+    # working with learning algorithms.
+    mu = np.mean(X, axis=0)
+    sigma = np.std(X, axis=0)
+    X_norm = X
+    X_norm = X_norm - mu
+    X_norm = X_norm / sigma
+    return [X_norm, mu, sigma]
+#END
+
         
 ## =========== Part 1: Loading and Visualizing Data =============
 #  We start the exercise by first loading and visualizing the dataset. 
@@ -238,6 +272,29 @@ print('# Training Examples\tTrain Error\tCross Validation Error\n')
 for i in range(m):
     print(i,'- train error: ', error_train[i],'----- Cross validation: ', error_val[i])
 
+## =========== Part 6: Feature Mapping for Polynomial Regression =============
+#  One solution to this is to use polynomial regression. You should now
+#  complete polyFeatures to map each example into its powers
+#
+
+p = 8
+
+# Map X onto Polynomial Features and Normalize
+X_poly = polyFeatures(X, p)
+X_poly, mu, sigma = featureNormalize(X_poly)   # Normalize
+
+# Map X_poly_test and normalize (using mu and sigma)
+X_poly_test = polyFeatures(Xtest, p)
+X_poly_test = X_poly_test - mu
+X_poly_test = X_poly_test / sigma
+
+# Map X_poly_val and normalize (using mu and sigma)
+X_poly_val = polyFeatures(Xval, p)
+X_poly_val = X_poly_val - mu
+X_poly_val = X_poly_val / sigma
+
+print('Normalized Training Example 1:\n')
+print( X_poly[1, :])
 
 
 
