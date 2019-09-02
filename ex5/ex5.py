@@ -16,18 +16,40 @@
 #
 
 ## ====================  Functions ====================
-def plotData(X, y, theta=None):
-    plt.scatter(X, y, c='red', marker='x')
-    
-    if theta is not None:
-        # Initialize some useful values
-        m, n = X.shape
-        XOne = np.ones((m, n+1), dtype=float)
-        XOne[:, 1:] = X
-        plt.plot(X, hX(theta, XOne), c='blue')
-        
+def plotData(X, y):
+    plt.scatter(X, y, c='red', marker='x')        
     plt.xlabel('Change in water level (x)')
     plt.ylabel('Water flowing out of the dam (y)')
+    plt.show()
+#END
+    
+def plotFit(X, y, theta, mu=None, sigma= None, p=1):
+    #Find the minimum and maximum value to know the end point of my curve
+    x_min = X.min()
+    x_max = X.max()
+    
+    #find the points between between min-10 and max+10 with step 0.05 and
+    #create as matrix
+    x = np.arange(start=(x_min-10), stop=(x_max+10), step=0.05)
+    m_poly = (x.shape)[0] # number of points
+    x = np.reshape(x, (m_poly, 1))
+    
+    #find the polynomial features if need it (p > 1)
+    X_poly = polyFeatures(x, p)
+    
+    #normalize the data if mu and sigma is known
+    if mu is not None and sigma is not None:
+        X_poly = X_poly - mu
+        X_poly = X_poly / sigma
+    
+    #add x0 to the points
+    X_polyOne = np.ones((m_poly, p+1), dtype=float)
+    X_polyOne[:, 1:] = X_poly
+    
+    plt.plot(x, hX(theta, X_polyOne), c='blue')
+    
+    plotData(X, y)
+
 #END
     
 def plotLearningCurve(error_train, error_val):
@@ -85,7 +107,7 @@ def linearRegGradient(theta, X, y, lambd):
     XOne = np.ones((m, n+1), dtype=float)
     XOne[:, 1:] = X
     
-    grad = (1 / m) * (np.matmul(XOne.T, hX(theta, XOne) - y)).ravel()
+    grad = (1 / m) * (np.matmul(XOne.T, hX(theta, XOne) - y)).flatten()
     
     #Regularization
     thetaReg = np.zeros((n+1, ), dtype=float)
@@ -113,7 +135,7 @@ def trainLinearReg(X, y, lambd=0):
     theta = op.fmin_ncg(f=linearRegCostFunction,
                         x0=initial_theta,
                         fprime=linearRegGradient,
-                        #maxiter=50,
+                        maxiter=200,
                         args=(X, y, lambd))
     return theta
 #END
@@ -140,10 +162,10 @@ def learningCurve(X, y, Xval, yval, lambd=0):
         theta = trainLinearReg(X[:i, :], y[:i], lambd)
         
         #Compute the training set error using the subset only of traning set
-        error_train[i-1] = linearRegCostFunction(theta, X[:i, :], y[:i], lambd)
+        error_train[i-1] = linearRegCostFunction(theta, X[:i, :], y[:i], 0)
         
         #Compute the cross validation error using the entire cross validation set
-        error_val[i-1] = linearRegCostFunction(theta, Xval, yval, lambd)
+        error_val[i-1] = linearRegCostFunction(theta, Xval, yval, 0)
         
     return error_train, error_val
 #END
@@ -254,7 +276,7 @@ lambd = 0
 theta = trainLinearReg(X, y, lambd)
 
 #  Plot fit over the data
-plotData(X,y, theta)
+plotFit(X, y, theta)
 
 
 ## =========== Part 5: Learning Curve for Linear Regression =============
@@ -296,6 +318,26 @@ X_poly_val = X_poly_val / sigma
 print('Normalized Training Example 1:\n')
 print( X_poly[1, :])
 
+
+## =========== Part 7: Learning Curve for Polynomial Regression =============
+#  Now, you will get to experiment with polynomial regression with multiple
+#  values of lambda. The code below runs polynomial regression with 
+#  lambd = 0. You should try running the code with different values of
+#  lambd to see how the fit and learning curve change.
+#
+
+lambd = 0
+theta = trainLinearReg(X_poly, y, lambd)
+
+# Plot training data and fit
+plotFit(X, y, theta, mu, sigma, p)
+
+error_train, error_val = learningCurve(X_poly, y, X_poly_val, yval, lambd)
+plotLearningCurve(error_train, error_val)
+
+print('# Training Examples\tTrain Error\tCross Validation Error\n')
+for i in range(m):
+    print(i,'- train error: ', error_train[i],'----- Cross validation: ', error_val[i])
 
 
 
