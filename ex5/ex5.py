@@ -30,6 +30,22 @@ def plotData(X, y, theta=None):
     plt.ylabel('Water flowing out of the dam (y)')
 #END
     
+def plotLearningCurve(error_train, error_val):
+    # Initialize some useful values
+    m = (error_train.shape)[0]
+    
+    XAxes = np.linspace(1, m, num=m)
+    
+    plt.plot(XAxes, error_train, c='blue')
+    plt.plot(XAxes, error_val, c='green')
+    
+    plt.title('Learning curve for linear regression')
+    plt.xlabel('Number of training examples')
+    plt.ylabel('Error')
+#END
+    
+    
+    
 def hX(theta, XOne):
     return np.matmul(XOne, theta)
 #END
@@ -101,8 +117,29 @@ def trainLinearReg(X, y, lambd=0):
                         args=(X, y, lambd))
     return theta
 #END
-
-
+    
+def learningCurve(X, y, Xval, yval, lambd=0):
+    
+    # Initialize some useful values
+    m = (X.shape)[0]
+    
+    #returned variables
+    error_train = np.zeros((m, ), dtype=float)
+    error_val = np.zeros((m, ), dtype=float)
+    
+    for i in range(1, m+1):
+        #training the linear regression using subset of training set(X from row zero to i-1)
+        theta = trainLinearReg(X[:i, :], y[:i], lambd)
+        
+        #Compute the training set error using the subset only of traning set
+        error_train[i-1] = linearRegCostFunction(theta, X[:i, :], y[:i], lambd)
+        
+        #Compute the cross validation error using the entire cross validation set
+        error_val[i-1] = linearRegCostFunction(theta, Xval, yval, lambd)
+        
+    return error_train, error_val
+#END
+        
 ## =========== Part 1: Loading and Visualizing Data =============
 #  We start the exercise by first loading and visualizing the dataset. 
 #  The following code will load the dataset into your environment and plot
@@ -184,6 +221,24 @@ theta = trainLinearReg(X, y, lambd)
 
 #  Plot fit over the data
 plotData(X,y, theta)
+
+
+## =========== Part 5: Learning Curve for Linear Regression =============
+#  Next, you should implement the learningCurve function. 
+#
+#  Write Up Note: Since the model is underfitting the data, we expect to
+#                 see a graph with "high bias" -- slide 8 in ML-advice.pdf 
+#
+
+lambd = 0
+error_train, error_val = learningCurve(X, y, Xval, yval, lambd)
+plotLearningCurve(error_train, error_val)
+
+print('# Training Examples\tTrain Error\tCross Validation Error\n')
+for i in range(m):
+    print(i,'- train error: ', error_train[i],'----- Cross validation: ', error_val[i])
+
+
 
 
 
