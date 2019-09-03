@@ -75,6 +75,16 @@ def plotLearningCurve(error_train, error_val):
     plt.show()
 #END
     
+def plotValidationCurve(measure, error_train, error_val):
+    plt.plot(measure, error_train, c='blue')
+    plt.plot(measure, error_val, c='green')
+    
+    plt.title('Validation Curve')
+    plt.xlabel('Measures')
+    plt.ylabel('Error')
+    
+    plt.show()
+#END
     
     
 def hX(theta, XOne):
@@ -203,6 +213,22 @@ def featureNormalize(X):
     X_norm = X_norm / sigma
     return [X_norm, mu, sigma]
 #END
+    
+def validationCurve(X_poly, y, X_poly_val, yval):
+    lambda_vec = np.array([0.01, 0.03, 0.1, 0.3, 1, 3, 10])
+    m_lambd = (lambda_vec.shape)[0]
+    
+    error_train = np.zeros((m_lambd, ), dtype=float) 
+    error_val = np.zeros((m_lambd, ), dtype=float)
+    
+    for i in range(m_lambd):
+        theta = trainLinearReg(X_poly, y, lambda_vec[i])
+        
+        error_train[i] = linearRegCostFunction(theta, X_poly, y, 0)
+        error_val[i] = linearRegCostFunction(theta, X_poly_val, yval, 0)
+        
+    return lambda_vec, error_train, error_val
+#END
 
         
 ## =========== Part 1: Loading and Visualizing Data =============
@@ -329,7 +355,7 @@ print( X_poly[1, :])
 #  lambd to see how the fit and learning curve change.
 #
 
-lambd = 0
+lambd = 3
 theta = trainLinearReg(X_poly, y, lambd)
 
 # Plot training data and fit
@@ -343,5 +369,32 @@ for i in range(m):
     print(i,'- train error: ', error_train[i],'----- Cross validation: ', error_val[i])
 
 
+## =========== Part 8: Validation for Selecting Lambda =============
+#  You will now implement validationCurve to test various values of 
+#  lambda on a validation set. You will then use this to select the
+#  "best" lambda value.
+#
+
+lambda_vec, error_train, error_val = validationCurve(X_poly, y, X_poly_val, yval)
+
+plotValidationCurve(lambda_vec, error_train, error_val)
+
+"""
+close all;
+plot(lambda_vec, error_train, lambda_vec, error_val);
+legend('Train', 'Cross Validation');
+xlabel('lambda');
+ylabel('Error');
+
+
+print('lambda\t\tTrain Error\tValidation Error\n')
+for i = 1:length(lambda_vec)
+	fprintf(' %f\t%f\t%f\n', ...
+            lambda_vec(i), error_train(i), error_val(i));
+end
+
+fprintf('Program paused. Press enter to continue.\n');
+pause;
+"""
 
 
